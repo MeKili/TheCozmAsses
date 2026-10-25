@@ -4,6 +4,7 @@ from django.test import SimpleTestCase
 
 from assignment.engine.gross_up import gross_up
 from assignment.engine.swiss_social_security import swiss_social_security
+from assignment.engine.swiss_tax import federal_tax, swiss_income_tax
 from assignment.engine.uk_tax import uk_tax
 
 
@@ -46,3 +47,22 @@ class SwissSocialSecurityTests(SimpleTestCase):
         at_limit = swiss_social_security(Decimal(148200))
         far_above = swiss_social_security(Decimal(300000))
         self.assertEqual(at_limit["alv"], far_above["alv"])
+
+
+class SwissTaxTests(SimpleTestCase):
+    def test_federal_tariff_matches_the_estv_example(self):
+        tax = federal_tax(Decimal(60000))
+        self.assertAlmostEqual(tax, Decimal("671.40"), delta=Decimal("0.05"))
+
+    def test_170000_without_pension(self):
+        tax = swiss_income_tax(Decimal(170000))
+        self.assertEqual(tax["federal"], 7362)
+        self.assertEqual(tax["canton"], 10673)
+        self.assertEqual(tax["city"], 13370)
+        self.assertEqual(tax["total"], 31405)
+
+    def test_170000_matches_the_official_calculator_with_its_pension(self):
+        tax = swiss_income_tax(Decimal(170000), Decimal(5988 + 593))
+        self.assertEqual(tax["federal"], 6735)
+        self.assertEqual(tax["canton"], 10130)
+        self.assertEqual(tax["city"], 12689)
