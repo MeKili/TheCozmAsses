@@ -267,3 +267,190 @@ ASSUMPTIONS = [
         "sources": [],
     },
 ]
+
+GOV = "https://www.gov.uk/"
+
+SSW_OVERVIEW = {
+    "title": "Senior or Specialist Worker visa: overview",
+    "url": GOV + "senior-specialist-worker-visa",
+}
+SSW_ELIGIBILITY = {
+    "title": "Senior or Specialist Worker visa: eligibility",
+    "url": GOV + "senior-specialist-worker-visa/eligibility",
+}
+SSW_COSTS = {
+    "title": "Senior or Specialist Worker visa: how much it costs",
+    "url": GOV + "senior-specialist-worker-visa/how-much-it-costs",
+}
+SPONSOR_OVERVIEW = {
+    "title": "UK visa sponsorship for employers",
+    "url": GOV + "uk-visa-sponsorship-employers",
+}
+SPONSOR_LICENCE = {
+    "title": "Apply for a sponsor licence: fees and how long it takes",
+    "url": GOV + "uk-visa-sponsorship-employers/apply-for-your-licence",
+}
+CERTIFICATES = {
+    "title": "Certificates of sponsorship and what they cost",
+    "url": GOV + "uk-visa-sponsorship-employers/certificates-of-sponsorship",
+}
+SKILLS_CHARGE = {
+    "title": "Immigration skills charge",
+    "url": GOV + "uk-visa-sponsorship-employers/immigration-skills-charge",
+}
+FASTER_DECISION = {
+    "title": "Get a faster decision on your visa",
+    "url": GOV + "faster-decision-visa-settlement",
+}
+ETA_OVERVIEW = {
+    "title": "Get an electronic travel authorisation (ETA)",
+    "url": GOV + "eta",
+}
+ETA_APPLY = {
+    "title": "Apply for an ETA",
+    "url": GOV + "eta/apply",
+}
+VISIT_ON_BUSINESS = {
+    "title": "Visit the UK as a Standard Visitor: visit on business",
+    "url": GOV + "standard-visitor/visit-on-business",
+}
+VISITOR_ACTIVITIES = {
+    "title": "Immigration Rules: Appendix Visitor, permitted activities",
+    "url": GOV + "guidance/immigration-rules/immigration-rules-appendix-visitor-permitted-activities",
+}
+SWISS_VISITORS = {
+    "title": "Visiting the UK as an EU, EEA or Swiss citizen",
+    "url": GOV + "guidance/visiting-the-uk-as-an-eu-eea-or-swiss-citizen",
+}
+PAYE_PAGE = UK_EMPLOYER_NI["sources"][0]
+SWISS_CERTIFICATE = SOCIAL_SECURITY_RULE["sources"][0]
+SWISS_FUND = SOCIAL_SECURITY_RULE["sources"][2]
+
+IMMIGRATION_COSTS = {
+    "visa_fee_up_to_3_years": Decimal(819),
+    "visa_fee_over_3_years": Decimal(1618),
+    "health_surcharge_per_year": Decimal(1035),
+    "certificate_of_sponsorship": Decimal(525),
+    "skills_charge_first_12_months": {"large": Decimal(1320), "small": Decimal(480)},
+    "skills_charge_each_extra_6_months": {"large": Decimal(660), "small": Decimal(240)},
+    "sponsor_licence": {"large": Decimal(1682), "small": Decimal(611)},
+    "faster_decision": {"standard": Decimal(0), "priority": Decimal(500), "super priority": Decimal(1000)},
+    "weeks_for_decision": {"standard": 3, "priority": 1, "super priority": 0},
+    "weeks_for_licence": 8,
+    "savings_needed": Decimal(1270),
+}
+
+IMMIGRATION_CARDS = [
+    {
+        "title": "Work permit",
+        "answer": "The employee needs a Senior or Specialist Worker visa (Global Business Mobility) "
+        "before starting work in the UK. It is the visa for an employee that a group sends to its UK company.",
+        "points": [
+            {
+                "text": "The employee already works for the group and is sponsored by the UK company. "
+                "The UK company must be approved by the Home Office as a sponsor and gives the employee "
+                "a certificate of sponsorship.",
+                "sources": [SSW_OVERVIEW, SSW_ELIGIBILITY],
+            },
+            {
+                "text": "The job must be on the list of eligible jobs and pay at least 52,500 pounds a year, "
+                "or the going rate for the job if that is higher.",
+                "sources": [SSW_ELIGIBILITY],
+            },
+            {
+                "text": "The employee must have worked for the group outside the UK for at least 12 months. "
+                "This is not needed at 73,900 pounds a year or more.",
+                "sources": [SSW_ELIGIBILITY],
+            },
+            {
+                "text": "The employee can stay up to 5 years in any 6 years, or up to 9 years in any 10 years "
+                "at 73,900 pounds a year or more.",
+                "sources": [SSW_OVERVIEW],
+            },
+            {
+                "text": "The employee applies online, up to 3 months before the start date and within 3 months "
+                "of getting the certificate of sponsorship.",
+                "sources": [SSW_OVERVIEW, SSW_ELIGIBILITY],
+            },
+            {
+                "text": "The employee must show at least 1,270 pounds in savings, unless the employer says on "
+                "the certificate that it pays the costs of the first month.",
+                "sources": [SSW_COSTS],
+            },
+            {
+                "text": "The certificate of coverage from the Swiss compensation fund is not a work permit.",
+                "sources": [SWISS_CERTIFICATE],
+            },
+        ],
+    },
+    {
+        "title": "Business visit before the assignment (business visa)",
+        "answer": "No visa is needed for a business visit. A Swiss citizen needs an electronic travel "
+        "authorisation (ETA) instead. It costs 20 pounds, lasts 2 years or until the passport ends, "
+        "and allows visits of up to 6 months.",
+        "points": [
+            {
+                "text": "The ETA is linked to the passport. The employee applies online or in the UK ETA app. "
+                "A decision usually comes within a day and can take up to 3 working days.",
+                "sources": [ETA_OVERVIEW, ETA_APPLY, SWISS_VISITORS],
+            },
+            {
+                "text": "Allowed: meetings, conferences, seminars and interviews, negotiating and signing deals "
+                "and contracts, work related training, site visits and inspections, and advising, training "
+                "or sharing skills on a specific internal project with UK employees of the same group.",
+                "sources": [VISIT_ON_BUSINESS, VISITOR_ACTIVITIES],
+            },
+            {
+                "text": "Not allowed: any other paid or unpaid work in the UK, or being paid by a UK "
+                "organisation for the visit. Working for the UK company needs the work visa first.",
+                "sources": [VISIT_ON_BUSINESS],
+            },
+        ],
+    },
+    {
+        "title": "Passport",
+        "answer": "The employee needs a valid passport that covers the whole time in the UK. "
+        "A Swiss national identity card is not enough.",
+        "points": [
+            {
+                "text": "A passport, or in a few listed cases a national identity card, valid for the whole "
+                "stay. Identity cards only work for people with EU Settlement Scheme status, a frontier "
+                "worker permit and similar groups.",
+                "sources": [SWISS_VISITORS],
+            },
+            {
+                "text": "The ETA is linked to the passport used to apply. The employee shows that passport "
+                "when travelling.",
+                "sources": [ETA_APPLY],
+            },
+        ],
+    },
+    {
+        "title": "What the company must do",
+        "answer": "",
+        "points": [
+            {
+                "text": "The UK company needs a sponsor licence if it has none. It checks that it is eligible "
+                "and that the job is suitable, chooses the Worker licence, decides who manages sponsorship "
+                "in the business, applies online and pays the fee.",
+                "sources": [SPONSOR_OVERVIEW, SPONSOR_LICENCE],
+            },
+            {
+                "text": "The UK company assigns a certificate of sponsorship to the employee and pays the "
+                "certificate fee and the immigration skills charge. It must pay the licence fee, the "
+                "certificate and the skills charge itself and may not ask the worker to pay them.",
+                "sources": [CERTIFICATES, SKILLS_CHARGE, SPONSOR_LICENCE],
+            },
+            {
+                "text": "The Swiss employer asks its Swiss compensation fund for a certificate of coverage "
+                "and keeps it. It is the proof that no UK National Insurance is due.",
+                "sources": [SWISS_CERTIFICATE, SWISS_FUND],
+            },
+            {
+                "text": "The UK company runs the pay of the employee through its UK payroll (PAYE), and reports "
+                "it to HMRC the way HMRC asks for tax equalised employees.",
+                "sources": [PAYE_PAGE, UK_GROSS_UP["sources"][1]],
+            },
+        ],
+    },
+]

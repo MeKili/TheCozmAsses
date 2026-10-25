@@ -8,6 +8,7 @@ from assignment import rules
 from assignment.engine.benefits import benefit_rows
 from assignment.engine.cost_table import cost_table
 from assignment.engine.gross_up import gross_up
+from assignment.engine.immigration import immigration_costs, immigration_steps
 from assignment.engine.social_security_rule import social_security_rule
 from assignment.engine.swiss_social_security import swiss_social_security
 from assignment.engine.swiss_tax import federal_tax, swiss_income_tax
@@ -186,3 +187,28 @@ class SourceTests(SimpleTestCase):
             host = urlparse(url).hostname
             official = any(host == site or host.endswith("." + site) for site in self.official_sites)
             self.assertTrue(official, url)
+
+
+class ImmigrationTests(SimpleTestCase):
+    def test_work_permit_business_visit_and_passport_each_have_an_answer_and_sources(self):
+        titles = [card["title"] for card in rules.IMMIGRATION_CARDS]
+        self.assertIn("Work permit", titles)
+        self.assertTrue(any(title.startswith("Business visit") for title in titles))
+        self.assertIn("Passport", titles)
+        for card in rules.IMMIGRATION_CARDS:
+            for point in card["points"]:
+                self.assertTrue(point["sources"], point["text"])
+
+    def test_costs_for_two_years(self):
+        without_licence = immigration_costs(2, "large", True, "standard")
+        self.assertEqual(without_licence["total"], 819 + 2070 + 525 + 2640)
+        with_licence = immigration_costs(2, "large", False, "standard")
+        self.assertEqual(with_licence["total"], without_licence["total"] + 1682)
+
+    def test_visa_fee_is_higher_for_stays_over_three_years(self):
+        self.assertEqual(immigration_costs(3, "small", True, "standard")["lines"][0]["amount"], 819)
+        self.assertEqual(immigration_costs(4, "small", True, "standard")["lines"][0]["amount"], 1618)
+
+    def test_weeks_add_the_licence_and_the_decision(self):
+        self.assertEqual(immigration_steps(True, "standard")["weeks"], 3)
+        self.assertEqual(immigration_steps(False, "standard")["weeks"], 11)
