@@ -4,11 +4,13 @@ from decimal import Decimal
 from django.test import SimpleTestCase
 
 from assignment.engine.benefits import benefit_rows
+from assignment.engine.cost_table import cost_table
 from assignment.engine.gross_up import gross_up
 from assignment.engine.social_security_rule import social_security_rule
 from assignment.engine.swiss_social_security import swiss_social_security
 from assignment.engine.swiss_tax import federal_tax, swiss_income_tax
 from assignment.engine.uk_tax import uk_tax
+from assignment.test_case import TEST_CASE
 
 
 class UkTaxTests(SimpleTestCase):
@@ -108,3 +110,27 @@ class BenefitsTests(SimpleTestCase):
     def test_flights_do_not_use_up_the_limit(self):
         rows = benefit_rows([self.moving, self.temporary_housing], 2, Decimal("1.10"), Decimal(1500))
         self.assertEqual(sum(row["taxable"][0] for row in rows), 500)
+
+
+class CostTableTests(SimpleTestCase):
+    def test_pack_test_case_gives_a_table_for_both_years(self):
+        table = cost_table(TEST_CASE)
+        self.assertEqual(table["years"], 2)
+        self.assertEqual(table["rule"]["country"], "Switzerland")
+        self.assertEqual([s["title"] for s in table["sections"]], [
+            "Home pay",
+            "Assignment benefits",
+            "Host tax and charges paid by the employer",
+            "Deductions",
+        ])
+        self.assertAlmostEqual(table["total_cost"][0], Decimal("291111.27"), delta=Decimal("0.01"))
+        self.assertAlmostEqual(table["total_cost"][1], Decimal("271210.45"), delta=Decimal("0.01"))
+
+    def test_rows_add_up_to_the_total_and_the_grossed_up_tax(self):
+        table = cost_table(TEST_CASE)
+        rows = [r for s in table["sections"] for r in s["rows"]]
+        for year in range(2):
+            self.assertEqual(sum(r["values"][year] for r in rows), table["total_cost"][year])
+            host_rows = table["sections"][2]["rows"]
+            uk_tax_paid = host_rows[0]["values"][year] + host_rows[1]["values"][year]
+            self.assertEqual(uk_tax_paid, table["working"][year]["tax"])
