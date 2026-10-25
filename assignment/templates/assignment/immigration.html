@@ -1,0 +1,65 @@
+{% extends "assignment/base.html" %}
+
+{% block content %}
+<p>What an employer needs to know to send a Swiss employee to the UK company of the same group. Every line has a link to the official page it comes from.</p>
+
+{% for card in cards %}
+<article>
+  <h2>{{ card.title }}</h2>
+  {% if card.answer %}<p><strong>{{ card.answer }}</strong></p>{% endif %}
+  <ul>
+    {% for point in card.points %}
+    <li>{{ point.text }} {% include "assignment/sources.html" with sources=point.sources %}</li>
+    {% endfor %}
+  </ul>
+</article>
+{% endfor %}
+
+<h2>How long it takes and how much it costs</h2>
+<form method="get">
+  {% include "assignment/field.html" with field=form.years %}
+  {% include "assignment/field.html" with field=form.company_size %}
+  <label>
+    {{ form.has_licence }}
+    {{ form.has_licence.label }}
+  </label>
+  {% include "assignment/field.html" with field=form.speed %}
+  <button type="submit">Calculate</button>
+</form>
+
+<h3>How long it takes</h3>
+<ol>
+  {% for step in steps.steps %}
+  <li><strong>{{ step.what }}.</strong> {{ step.time }} {% include "assignment/sources.html" with sources=step.sources %}</li>
+  {% endfor %}
+</ol>
+<p>Adding up the decisions of the sponsor licence and the visa, this takes about {{ steps.weeks }} weeks. Time to get documents and appointments comes on top.</p>
+
+<h3>How much it costs</h3>
+<div class="scroll">
+  <table class="money">
+    <thead>
+      <tr><th>Item</th><th>Paid by</th><th>Pounds</th></tr>
+    </thead>
+    <tbody>
+      {% for line in costs.lines %}
+      <tr>
+        <td>
+          {{ line.label }}
+          {% if line.note %}<br><small>{{ line.note }}</small>{% endif %}
+          <br>{% include "assignment/sources.html" with sources=line.sources %}
+        </td>
+        <td>{{ line.paid_by }}</td>
+        <td>{{ line.amount|floatformat:"2g" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr><th>Total</th><th></th><th>{{ costs.total|floatformat:"2g" }}</th></tr>
+      <tr><td>Paid by the employee</td><td></td><td>{{ costs.employee_total|floatformat:"2g" }}</td></tr>
+      <tr><td>Paid by the UK company</td><td></td><td>{{ costs.company_total|floatformat:"2g" }}</td></tr>
+    </tfoot>
+  </table>
+</div>
+<p>These costs are not part of the total on the cost estimate tab. The employer can choose to pay the costs of the employee as well.</p>
+{% endblock %}

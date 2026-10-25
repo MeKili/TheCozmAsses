@@ -1,0 +1,50 @@
+{% extends "assignment/base.html" %}
+
+{% block content %}
+<form method="get">
+  <h2>1. Route and dates</h2>
+  {% include "assignment/field.html" with field=form.home_country %}
+  {% include "assignment/field.html" with field=form.host_country %}
+  <p>The employee: Swiss national, single, no children, with the employer in Zurich for 3 years. The tool is built for this kind of employee.</p>
+  {% include "assignment/field.html" with field=form.start %}
+  {% include "assignment/field.html" with field=form.end %}
+  <label>
+    {{ form.replaces_another_worker }}
+    {{ form.replaces_another_worker.label }}
+  </label>
+  <small>{{ form.replaces_another_worker.help_text }}</small>
+
+  <h2>2. Pay and exchange rate</h2>
+  {% include "assignment/field.html" with field=form.salary %}
+  {% include "assignment/field.html" with field=form.bonus %}
+  {% include "assignment/field.html" with field=form.exchange_rate %}
+  {% include "assignment/field.html" with field=form.pension %}
+
+  <h2>3. Assignment benefits</h2>
+  <p>Fill in a row for each benefit the employer pays. Leave unused rows empty. The last column lets you change how the UK taxes it. Moving costs and temporary housing count as removal costs, and the employer can pay 8,000 of those tax free for a move.</p>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Type</th><th>Amount</th><th>Currency</th><th>Paid</th><th>UK tax</th></tr>
+      </thead>
+      <tbody>
+        {% for row in form.benefit_rows %}
+        <tr>
+          {% for field in row %}
+          <td>{{ field }}{% for error in field.errors %}<small>{{ error }}</small>{% endfor %}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "assignment/field.html" with field=form.flights %}
+
+  <button type="submit">Calculate</button>
+  <a href="?test_case=1" role="button">Load the test case</a>
+</form>
+
+{% if table %}
+{% include "assignment/result.html" %}
+{% endif %}
+{% endblock %}

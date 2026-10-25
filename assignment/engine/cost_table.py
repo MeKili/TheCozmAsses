@@ -7,6 +7,7 @@ from assignment.engine.swiss_social_security import swiss_social_security
 from assignment.engine.swiss_tax import swiss_income_tax
 from assignment.engine.uk_tax import uk_tax
 from assignment.rules import (
+    ASSUMPTIONS,
     SWISS_SOCIAL_SECURITY,
     SWISS_TAX,
     UK_EMPLOYER_NI,
@@ -16,12 +17,19 @@ from assignment.rules import (
 
 
 def row(label, values, sources=(), tag="", note=""):
-    return {"label": label, "values": values, "sources": sources, "tag": tag, "note": note}
+    return {
+        "label": label,
+        "values": values,
+        "total": sum(values),
+        "sources": sources,
+        "tag": tag,
+        "note": note,
+    }
 
 
 def section(title, rows, years):
     totals = [sum(r["values"][year] for r in rows) for year in range(years)]
-    return {"title": title, "rows": rows, "totals": totals}
+    return {"title": title, "rows": rows, "totals": totals, "total": sum(totals)}
 
 
 def cost_table(inputs):
@@ -56,7 +64,15 @@ def cost_table(inputs):
 
         income_tax.append(uk_tax(income))
         tax_on_tax.append(tax - uk_tax(income))
-        working.append({"year": year + 1, "income": income, "tax": tax, "rounds": rounds})
+        working.append(
+            {
+                "year": year + 1,
+                "income": income,
+                "tax": tax,
+                "rounds": rounds,
+                "check": uk_tax(income + tax),
+            }
+        )
 
         employer_ni.append(Decimal(0))
         class_1a.append(Decimal(0))
@@ -146,6 +162,7 @@ def cost_table(inputs):
 
     return {
         "years": years,
+        "year_numbers": list(range(1, years + 1)),
         "exchange_rate": rate,
         "rule": rule,
         "sections": sections,
@@ -155,4 +172,5 @@ def cost_table(inputs):
         "multiple_by_year": [t / h for t, h in zip(total_cost, home_pay["totals"])],
         "multiple": overall_total / sum(home_pay["totals"]),
         "working": working,
+        "assumptions": ASSUMPTIONS,
     }

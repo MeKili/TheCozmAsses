@@ -1,15 +1,19 @@
 from datetime import date
 from decimal import Decimal
+from urllib.parse import urlparse
 
 from django.test import SimpleTestCase
 
+from assignment import rules
 from assignment.engine.benefits import benefit_rows
 from assignment.engine.cost_table import cost_table
 from assignment.engine.gross_up import gross_up
+from assignment.engine.immigration import immigration_costs, immigration_steps
 from assignment.engine.social_security_rule import social_security_rule
 from assignment.engine.swiss_social_security import swiss_social_security
 from assignment.engine.swiss_tax import federal_tax, swiss_income_tax
 from assignment.engine.uk_tax import uk_tax
+from assignment.forms import CostForm, flatten
 from assignment.test_case import TEST_CASE
 
 
@@ -134,3 +138,96 @@ class CostTableTests(SimpleTestCase):
             host_rows = table["sections"][2]["rows"]
             uk_tax_paid = host_rows[0]["values"][year] + host_rows[1]["values"][year]
             self.assertEqual(uk_tax_paid, table["working"][year]["tax"])
+
+
+class FormTests(SimpleTestCase):
+    def test_pack_test_case_is_accepted_as_given(self):
+        form = CostForm(flatten(TEST_CASE))
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(len(form.cleaned_data["benefits"]), 4)
+
+    def test_bad_input_gives_readable_messages(self):
+        data = flatten(TEST_CASE)
+        data["salary"] = ""
+        data["bonus"] = "-5"
+        data["exchange_rate"] = "0"
+        form = CostForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors["salary"], ["This field is required."])
+        self.assertIn("greater than or equal to 0", form.errors["bonus"][0])
+        self.assertEqual(form.errors["exchange_rate"], ["The exchange rate must be more than 0."])
+
+    def test_dates_must_be_in_order_and_whole_years(self):
+        data = flatten(TEST_CASE)
+        data["end"] = "2026-03-01"
+        self.assertIn("must be after the start date", CostForm(data).errors["end"][0])
+        data["end"] = "2028-05-05"
+        self.assertIn("whole number of years", CostForm(data).errors["end"][0])
+
+
+class SourceTests(SimpleTestCase):
+    official_sites = ["gov.uk", "admin.ch", "zh.ch", "stadt-zuerich.ch", "ahv-iv.ch"]
+
+    def find_urls(self, value):
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if key == "url":
+                    yield item
+                else:
+                    yield from self.find_urls(item)
+        elif isinstance(value, list):
+            for item in value:
+                yield from self.find_urls(item)
+
+    def test_every_source_link_is_on_an_official_site(self):
+        everything = [getattr(rules, name) for name in dir(rules) if name.isupper()]
+        urls = list(self.find_urls(everything))
+        self.assertGreater(len(urls), 20)
+        for url in urls:
+            host = urlparse(url).hostname
+            official = any(host == site or host.endswith("." + site) for site in self.official_sites)
+            self.assertTrue(official, url)
+
+
+class ImmigrationTests(SimpleTestCase):
+    def test_work_permit_business_visit_and_passport_each_have_an_answer_and_sources(self):
+        titles = [card["title"] for card in rules.IMMIGRATION_CARDS]
+        self.assertIn("Work permit", titles)
+        self.assertTrue(any(title.startswith("Business visit") for title in titles))
+        self.assertIn("Passport", titles)
+        for card in rules.IMMIGRATION_CARDS:
+            for point in card["points"]:
+                self.assertTrue(point["sources"], point["text"])
+
+    def test_costs_for_two_years(self):
+        without_licence = immigration_costs(2, "large", True, "standard")
+        self.assertEqual(without_licence["total"], 819 + 2070 + 525 + 2640)
+        with_licence = immigration_costs(2, "large", False, "standard")
+        self.assertEqual(with_licence["total"], without_licence["total"] + 1682)
+
+    def test_visa_fee_is_higher_for_stays_over_three_years(self):
+        self.assertEqual(immigration_costs(3, "small", True, "standard")["lines"][0]["amount"], 819)
+        self.assertEqual(immigration_costs(4, "small", True, "standard")["lines"][0]["amount"], 1618)
+
+    def test_weeks_add_the_licence_and_the_decision(self):
+        self.assertEqual(immigration_steps(True, "standard")["weeks"], 3)
+        self.assertEqual(immigration_steps(False, "standard")["weeks"], 11)
+
+
+class PageTests(SimpleTestCase):
+    def test_cost_page_shows_the_table_for_the_test_case(self):
+        page = self.client.get("/?test_case=1").content.decode()
+        self.assertIn("291,111.27", page)
+        self.assertIn("271,210.45", page)
+
+    def test_immigration_page_states_a_requirement_for_all_three(self):
+        page = self.client.get("/immigration/").content.decode()
+        self.assertIn("Work permit", page)
+        self.assertIn("Business visit before the assignment", page)
+        self.assertIn("Passport", page)
+        self.assertIn("https://www.gov.uk/senior-specialist-worker-visa", page)
+
+    def test_immigration_page_survives_bad_input(self):
+        response = self.client.get("/immigration/?years=9&speed=fast")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Ensure this value is less than or equal to 5", response.content.decode())
