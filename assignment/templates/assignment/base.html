@@ -13,7 +13,8 @@
     <p>What it costs an employer to send an employee from Switzerland to the UK. An exercise, not tax advice.</p>
     <nav>
       <ul>
-        <li><a href="{% url 'cost' %}" aria-current="page">Cost estimate</a></li>
+        <li><a href="{% url 'cost' %}"{% if tab == 'cost' %} aria-current="page"{% endif %}>Cost estimate</a></li>
+        <li><a href="{% url 'immigration' %}"{% if tab == 'immigration' %} aria-current="page"{% endif %}>Immigration</a></li>
       </ul>
     </nav>
   </header>

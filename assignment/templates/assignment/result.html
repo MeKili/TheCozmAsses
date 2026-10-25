@@ -68,6 +68,8 @@
 </div>
 <p>Over the whole assignment the employer pays about {{ table.overall_total|floatformat:"0g" }} pounds, which is {{ table.overall_total_chf|floatformat:"0g" }} francs at {{ table.exchange_rate }} francs to the pound.</p>
 
+<p>The costs of the work visa for a stay of {{ table.years }} years are on the <a href="{% url 'immigration' %}?years={{ table.years }}">Immigration tab</a>. They are not part of this total.</p>
+
 <h3>Assumptions</h3>
 <ol>
   {% for assumption in table.assumptions %}

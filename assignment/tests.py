@@ -212,3 +212,22 @@ class ImmigrationTests(SimpleTestCase):
     def test_weeks_add_the_licence_and_the_decision(self):
         self.assertEqual(immigration_steps(True, "standard")["weeks"], 3)
         self.assertEqual(immigration_steps(False, "standard")["weeks"], 11)
+
+
+class PageTests(SimpleTestCase):
+    def test_cost_page_shows_the_table_for_the_test_case(self):
+        page = self.client.get("/?test_case=1").content.decode()
+        self.assertIn("291,111.27", page)
+        self.assertIn("271,210.45", page)
+
+    def test_immigration_page_states_a_requirement_for_all_three(self):
+        page = self.client.get("/immigration/").content.decode()
+        self.assertIn("Work permit", page)
+        self.assertIn("Business visit before the assignment", page)
+        self.assertIn("Passport", page)
+        self.assertIn("https://www.gov.uk/senior-specialist-worker-visa", page)
+
+    def test_immigration_page_survives_bad_input(self):
+        response = self.client.get("/immigration/?years=9&speed=fast")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Ensure this value is less than or equal to 5", response.content.decode())

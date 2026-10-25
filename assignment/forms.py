@@ -213,3 +213,32 @@ def flatten(inputs):
         for part in BENEFIT_PARTS:
             data[f"benefit_{i}_{part}"] = benefit.get(part, "")
     return data
+
+
+class ImmigrationForm(forms.Form):
+    years = forms.IntegerField(
+        label="Length of the stay in years",
+        min_value=1,
+        max_value=MAX_YEARS,
+        initial=2,
+    )
+    company_size = forms.ChoiceField(
+        label="Size of the UK company",
+        choices=[("large", "Medium or large company"), ("small", "Small company or charity")],
+        initial="large",
+        help_text="A company is small if at least 2 of these are true: a turnover of 15 million "
+        "pounds or less, assets of 7.5 million pounds or less, 50 employees or fewer.",
+    )
+    has_licence = forms.BooleanField(
+        required=False,
+        label="The UK company already has a sponsor licence",
+    )
+    speed = forms.ChoiceField(
+        label="Speed of the visa decision",
+        choices=[
+            ("standard", "Standard"),
+            ("priority", "Priority service"),
+            ("super priority", "Super priority service"),
+        ],
+        initial="standard",
+    )

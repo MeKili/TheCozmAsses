@@ -32,3 +32,8 @@ td input[type="text"] {
 td input[type="number"] {
   min-width: 5em;
 }
+
+nav a[aria-current="page"] {
+  font-weight: bold;
+  text-decoration: underline;
+}
