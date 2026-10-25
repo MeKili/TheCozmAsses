@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from django.test import SimpleTestCase
 
+from assignment.engine.benefits import benefit_rows
 from assignment.engine.gross_up import gross_up
 from assignment.engine.social_security_rule import social_security_rule
 from assignment.engine.swiss_social_security import swiss_social_security
@@ -86,3 +87,24 @@ class SocialSecurityRuleTests(SimpleTestCase):
     def test_replacing_another_worker_flips_to_the_uk(self):
         rule = social_security_rule(date(2026, 4, 6), date(2028, 4, 5), True)
         self.assertEqual(rule["country"], "United Kingdom")
+
+
+class BenefitsTests(SimpleTestCase):
+    moving = {
+        "name": "Moving costs", "type": "moving", "amount": Decimal(6000),
+        "currency": "GBP", "paid": "once in year 1",
+    }
+    temporary_housing = {
+        "name": "Temporary housing", "type": "temporary_housing", "amount": Decimal(4000),
+        "currency": "GBP", "paid": "once in year 1",
+    }
+
+    def test_removal_costs_over_the_limit_are_taxable(self):
+        rows = benefit_rows([self.moving, self.temporary_housing], 2, Decimal("1.10"), Decimal(0))
+        self.assertEqual(sum(row["taxable"][0] for row in rows), 2000)
+        self.assertEqual(rows[0]["tag"], "not taxable in the UK")
+        self.assertEqual(rows[1]["tag"], "part taxable benefit in kind")
+
+    def test_flights_do_not_use_up_the_limit(self):
+        rows = benefit_rows([self.moving, self.temporary_housing], 2, Decimal("1.10"), Decimal(1500))
+        self.assertEqual(sum(row["taxable"][0] for row in rows), 500)
