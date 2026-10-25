@@ -1,0 +1,87 @@
+<h2>Result</h2>
+
+<article>
+  <h3>Which social security applies: {{ table.rule.country }}</h3>
+  <p>{{ table.rule.reason }}</p>
+  {% include "assignment/sources.html" with sources=table.rule.sources %}
+</article>
+
+{% for section in table.sections %}
+<h3>{{ forloop.counter }}. {{ section.title }}</h3>
+<div class="scroll">
+  <table class="money">
+    <thead>
+      <tr>
+        <th>Item (pounds)</th>
+        {% for number in table.year_numbers %}<th>Year {{ number }}</th>{% endfor %}
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in section.rows %}
+      <tr>
+        <td>
+          {{ row.label }}
+          {% if row.tag %}<br><small>UK tax: {{ row.tag }}</small>{% endif %}
+          {% if row.note %}<br><small>{{ row.note }}</small>{% endif %}
+          {% if row.sources %}<br>{% include "assignment/sources.html" with sources=row.sources %}{% endif %}
+        </td>
+        {% for value in row.values %}<td>{{ value|floatformat:"2g" }}</td>{% endfor %}
+        <td>{{ row.total|floatformat:"2g" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th>Total of this part</th>
+        {% for value in section.totals %}<th>{{ value|floatformat:"2g" }}</th>{% endfor %}
+        <th>{{ section.total|floatformat:"2g" }}</th>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+{% endfor %}
+
+<h3>Total cost for the employer</h3>
+<div class="scroll">
+  <table class="money">
+    <thead>
+      <tr>
+        <th></th>
+        {% for number in table.year_numbers %}<th>Year {{ number }}</th>{% endfor %}
+        <th>Whole assignment</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>Total employer cost (pounds)</th>
+        {% for value in table.total_cost %}<td>{{ value|floatformat:"2g" }}</td>{% endfor %}
+        <td>{{ table.overall_total|floatformat:"2g" }}</td>
+      </tr>
+      <tr>
+        <th>Times the home pay</th>
+        {% for value in table.multiple_by_year %}<td>{{ value|floatformat:2 }}</td>{% endfor %}
+        <td>{{ table.multiple|floatformat:2 }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>Over the whole assignment the employer pays about {{ table.overall_total|floatformat:"0g" }} pounds, which is {{ table.overall_total_chf|floatformat:"0g" }} francs at {{ table.exchange_rate }} francs to the pound.</p>
+
+<h3>Assumptions</h3>
+<ol>
+  {% for assumption in table.assumptions %}
+  <li>{{ assumption.text }} {% include "assignment/sources.html" with sources=assumption.sources %}</li>
+  {% endfor %}
+</ol>
+
+<details>
+  <summary>Show working</summary>
+  <p>The tax the employer pays is also taxable pay. So the tax T must fit T = UK tax on (income + T). We start with T = 0, work out the UK tax on income + T, and repeat until T stops changing. The income is the net home pay plus the taxable benefits.</p>
+  {% for step in table.working %}
+  <h4>Year {{ step.year }}</h4>
+  <p>Income before the tax on tax: {{ step.income|floatformat:"2g" }} pounds. Tax the employer pays: {{ step.tax|floatformat:"2g" }} pounds, found in {{ step.rounds|length }} rounds.</p>
+  <p>First five rounds: {% for value in step.rounds|slice:":5" %}{{ value|floatformat:"2g" }}{% if not forloop.last %}, {% endif %}{% endfor %}. Last round: {{ step.rounds|last|floatformat:"2g" }}.</p>
+  <p>Check: the UK tax on income + T is {{ step.check|floatformat:"2g" }} pounds, and T is {{ step.tax|floatformat:"2g" }} pounds.</p>
+  {% endfor %}
+</details>
