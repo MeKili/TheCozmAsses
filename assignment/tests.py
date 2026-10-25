@@ -10,6 +10,7 @@ from assignment.engine.social_security_rule import social_security_rule
 from assignment.engine.swiss_social_security import swiss_social_security
 from assignment.engine.swiss_tax import federal_tax, swiss_income_tax
 from assignment.engine.uk_tax import uk_tax
+from assignment.forms import CostForm, flatten
 from assignment.test_case import TEST_CASE
 
 
@@ -134,3 +135,28 @@ class CostTableTests(SimpleTestCase):
             host_rows = table["sections"][2]["rows"]
             uk_tax_paid = host_rows[0]["values"][year] + host_rows[1]["values"][year]
             self.assertEqual(uk_tax_paid, table["working"][year]["tax"])
+
+
+class FormTests(SimpleTestCase):
+    def test_pack_test_case_is_accepted_as_given(self):
+        form = CostForm(flatten(TEST_CASE))
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(len(form.cleaned_data["benefits"]), 4)
+
+    def test_bad_input_gives_readable_messages(self):
+        data = flatten(TEST_CASE)
+        data["salary"] = ""
+        data["bonus"] = "-5"
+        data["exchange_rate"] = "0"
+        form = CostForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors["salary"], ["This field is required."])
+        self.assertIn("greater than or equal to 0", form.errors["bonus"][0])
+        self.assertEqual(form.errors["exchange_rate"], ["The exchange rate must be more than 0."])
+
+    def test_dates_must_be_in_order_and_whole_years(self):
+        data = flatten(TEST_CASE)
+        data["end"] = "2026-03-01"
+        self.assertIn("must be after the start date", CostForm(data).errors["end"][0])
+        data["end"] = "2028-05-05"
+        self.assertIn("whole number of years", CostForm(data).errors["end"][0])
