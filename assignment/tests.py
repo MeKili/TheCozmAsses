@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.test import SimpleTestCase
 
 from assignment.engine.gross_up import gross_up
+from assignment.engine.swiss_social_security import swiss_social_security
 from assignment.engine.uk_tax import uk_tax
 
 
@@ -32,3 +33,16 @@ class GrossUpTests(SimpleTestCase):
         one_step = uk_tax(income) / (1 - Decimal("0.4"))
         self.assertGreater(tax, one_step + 5000)
         self.assertAlmostEqual(tax, Decimal("64914.545"), places=2)
+
+
+class SwissSocialSecurityTests(SimpleTestCase):
+    def test_one_side_on_170000(self):
+        social = swiss_social_security(Decimal(170000))
+        self.assertEqual(social["ahv_iv_eo"], 9010)
+        self.assertEqual(social["alv"], Decimal("1630.2"))
+        self.assertEqual(social["total"], Decimal("10640.2"))
+
+    def test_unemployment_insurance_stops_at_the_limit(self):
+        at_limit = swiss_social_security(Decimal(148200))
+        far_above = swiss_social_security(Decimal(300000))
+        self.assertEqual(at_limit["alv"], far_above["alv"])
