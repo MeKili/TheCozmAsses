@@ -121,6 +121,10 @@ SOCIAL_SECURITY_RULE = {
             "title": "UK and Switzerland social security convention, Article 14",
             "url": "https://assets.publishing.service.gov.uk/media/6697bfdaa3c2a28abb50d14e/TS_47.2024_UK_Switzerland_Convention_Social_Security_Coordination_with_corrections.pdf",
         },
+        {
+            "title": "AHV/IV information centre: posting from Switzerland (leaflet 10.01)",
+            "url": "https://www.ahv-iv.ch/p/10.01.d",
+        },
     ],
 }
 
@@ -182,3 +186,84 @@ BENEFIT_TYPES = {
         "sources": [EIM03102],
     },
 }
+
+ASSUMPTIONS = [
+    {
+        "text": "The employee is a Swiss national, single, with no children, and has worked "
+        "for the employer in Zurich for 3 years. The employer is Swiss and its UK company runs the UK payroll.",
+        "sources": [],
+    },
+    {
+        "text": "The employee is UK tax resident in every year of the assignment. "
+        "The rates and limits of 2026 to 2027 are used for every year.",
+        "sources": UK_INCOME_TAX["sources"],
+    },
+    {
+        "text": "Every year is a full year. Home pay and monthly benefits are the same in every year. "
+        "The exchange rate does not change, and francs are divided by it to get pounds.",
+        "sources": [],
+    },
+    {
+        "text": "The employer pays all the UK income tax on the pay and the taxable benefits, in the year "
+        "it arises. The tax is itself taxable pay, so it is worked out again and again until the number "
+        "stops changing. There is no other income and no other tax relief.",
+        "sources": UK_GROSS_UP["sources"],
+    },
+    {
+        "text": "Swiss social security keeps applying when the assignment lasts no more than 24 months and "
+        "the employee does not replace another posted worker. Then no UK National Insurance is due and "
+        "the Swiss contributions of both sides are a cost. The employer asks its Swiss compensation fund "
+        "for a certificate of coverage.",
+        "sources": SOCIAL_SECURITY_RULE["sources"],
+    },
+    {
+        "text": "If the assignment is longer than 24 months, or replaces another posted worker, UK National "
+        "Insurance is due from the first day. The tool then counts the employer part (15% of pay above "
+        "5,000 a year) and 15% on benefits in kind. The part of the employee is not worked out. "
+        "Both countries can agree an exception, which is not worked out either.",
+        "sources": UK_EMPLOYER_NI["sources"],
+    },
+    {
+        "text": "The hypothetical Swiss tax is the federal, canton and city income tax of a single person in "
+        "the city of Zurich, with no church tax and without the personal tax of 24 francs that the official "
+        "calculator adds. It uses the tariffs, deductions and tax multipliers of 2026.",
+        "sources": SWISS_TAX["sources"],
+    },
+    {
+        "text": "The hypothetical Swiss social security is what the employee would pay at home for AHV, IV, EO "
+        "and unemployment insurance. The pension fund is left out as the pack says, unless you enter it.",
+        "sources": SWISS_SOCIAL_SECURITY["sources"],
+    },
+    {
+        "text": "Housing paid straight to the landlord is taxed as a benefit in kind. If the tenancy is in the "
+        "name of the employee, HMRC taxes it as pay instead. The tax is the same.",
+        "sources": BENEFIT_TYPES["housing"]["sources"],
+    },
+    {
+        "text": "A cash allowance is taxable cash pay.",
+        "sources": BENEFIT_TYPES["cash"]["sources"],
+    },
+    {
+        "text": "Moving costs and temporary housing are removal costs. The employer can pay 8,000 of them tax "
+        "free for one move, in the order they are listed. The flights of the employee are not taxed and do "
+        "not use up the 8,000, if the employee is a new UK resident.",
+        "sources": REMOVAL_COSTS["sources"] + FLIGHTS["sources"],
+    },
+    {
+        "text": "Immigration costs are on the Immigration tab and are not part of this total.",
+        "sources": [],
+    },
+    {
+        "text": "Not worked out: the Swiss family allowance fund, accident insurance and fees of the Swiss "
+        "compensation fund, the UK Apprenticeship Levy and Employment Allowance, VAT on the serviced "
+        "apartment, advice and tax return fees, home leave, hardship allowances and changes in the "
+        "exchange rate.",
+        "sources": [],
+    },
+    {
+        "text": "Assumed without a check: the employee was insured in Switzerland for long enough before the "
+        "posting, the job is on the UK list of eligible jobs and is paid above its going rate, and the UK "
+        "company holds or gets a sponsor licence.",
+        "sources": [],
+    },
+]

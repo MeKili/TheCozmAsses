@@ -1,3 +1,13 @@
+div.scroll {
+  overflow-x: auto;
+}
+
+table.money td + td,
+table.money th + th {
+  text-align: right;
+  white-space: nowrap;
+}
+
 td {
   padding: 0.3rem 0.4rem;
 }

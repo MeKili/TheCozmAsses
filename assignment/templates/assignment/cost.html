@@ -22,7 +22,7 @@
 
   <h2>3. Assignment benefits</h2>
   <p>Fill in a row for each benefit the employer pays. Leave unused rows empty. The last column lets you change how the UK taxes it. Moving costs and temporary housing count as removal costs, and the employer can pay 8,000 of those tax free for a move.</p>
-  <div style="overflow-x: auto">
+  <div class="scroll">
     <table>
       <thead>
         <tr><th>Name</th><th>Type</th><th>Amount</th><th>Currency</th><th>Paid</th><th>UK tax</th></tr>
@@ -43,4 +43,8 @@
   <button type="submit">Calculate</button>
   <a href="?test_case=1" role="button">Load the test case</a>
 </form>
+
+{% if table %}
+{% include "assignment/result.html" %}
+{% endif %}
 {% endblock %}

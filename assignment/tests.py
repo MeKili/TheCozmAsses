@@ -1,8 +1,10 @@
 from datetime import date
 from decimal import Decimal
+from urllib.parse import urlparse
 
 from django.test import SimpleTestCase
 
+from assignment import rules
 from assignment.engine.benefits import benefit_rows
 from assignment.engine.cost_table import cost_table
 from assignment.engine.gross_up import gross_up
@@ -160,3 +162,27 @@ class FormTests(SimpleTestCase):
         self.assertIn("must be after the start date", CostForm(data).errors["end"][0])
         data["end"] = "2028-05-05"
         self.assertIn("whole number of years", CostForm(data).errors["end"][0])
+
+
+class SourceTests(SimpleTestCase):
+    official_sites = ["gov.uk", "admin.ch", "zh.ch", "stadt-zuerich.ch", "ahv-iv.ch"]
+
+    def find_urls(self, value):
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if key == "url":
+                    yield item
+                else:
+                    yield from self.find_urls(item)
+        elif isinstance(value, list):
+            for item in value:
+                yield from self.find_urls(item)
+
+    def test_every_source_link_is_on_an_official_site(self):
+        everything = [getattr(rules, name) for name in dir(rules) if name.isupper()]
+        urls = list(self.find_urls(everything))
+        self.assertGreater(len(urls), 20)
+        for url in urls:
+            host = urlparse(url).hostname
+            official = any(host == site or host.endswith("." + site) for site in self.official_sites)
+            self.assertTrue(official, url)

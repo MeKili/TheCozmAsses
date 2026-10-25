@@ -1,0 +1,1 @@
+{% if sources %}<small>Source: {% for source in sources %}<a href="{{ source.url }}" target="_blank" rel="noopener">{{ source.title }}</a>{% if not forloop.last %}; {% endif %}{% endfor %}</small>{% endif %}
