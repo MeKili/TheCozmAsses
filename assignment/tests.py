@@ -1,8 +1,12 @@
+from datetime import date
 from decimal import Decimal
 
 from django.test import SimpleTestCase
 
 from assignment.engine.gross_up import gross_up
+from assignment.engine.social_security_rule import social_security_rule
+from assignment.engine.swiss_social_security import swiss_social_security
+from assignment.engine.swiss_tax import federal_tax, swiss_income_tax
 from assignment.engine.uk_tax import uk_tax
 
 
@@ -32,3 +36,53 @@ class GrossUpTests(SimpleTestCase):
         one_step = uk_tax(income) / (1 - Decimal("0.4"))
         self.assertGreater(tax, one_step + 5000)
         self.assertAlmostEqual(tax, Decimal("64914.545"), places=2)
+
+
+class SwissSocialSecurityTests(SimpleTestCase):
+    def test_one_side_on_170000(self):
+        social = swiss_social_security(Decimal(170000))
+        self.assertEqual(social["ahv_iv_eo"], 9010)
+        self.assertEqual(social["alv"], Decimal("1630.2"))
+        self.assertEqual(social["total"], Decimal("10640.2"))
+
+    def test_unemployment_insurance_stops_at_the_limit(self):
+        at_limit = swiss_social_security(Decimal(148200))
+        far_above = swiss_social_security(Decimal(300000))
+        self.assertEqual(at_limit["alv"], far_above["alv"])
+
+
+class SwissTaxTests(SimpleTestCase):
+    def test_federal_tariff_matches_the_estv_example(self):
+        tax = federal_tax(Decimal(60000))
+        self.assertAlmostEqual(tax, Decimal("671.40"), delta=Decimal("0.05"))
+
+    def test_170000_without_pension(self):
+        tax = swiss_income_tax(Decimal(170000))
+        self.assertEqual(tax["federal"], 7362)
+        self.assertEqual(tax["canton"], 10673)
+        self.assertEqual(tax["city"], 13370)
+        self.assertEqual(tax["total"], 31405)
+
+    def test_170000_matches_the_official_calculator_with_its_pension(self):
+        tax = swiss_income_tax(Decimal(170000), Decimal(5988 + 593))
+        self.assertEqual(tax["federal"], 6735)
+        self.assertEqual(tax["canton"], 10130)
+        self.assertEqual(tax["city"], 12689)
+
+
+class SocialSecurityRuleTests(SimpleTestCase):
+    def test_exactly_24_months_stays_swiss(self):
+        rule = social_security_rule(date(2026, 4, 6), date(2028, 4, 5), False)
+        self.assertEqual(rule["country"], "Switzerland")
+        self.assertEqual(rule["months"], 24)
+
+    def test_more_than_24_months_flips_to_the_uk(self):
+        one_day_more = social_security_rule(date(2026, 4, 6), date(2028, 4, 6), False)
+        one_month_more = social_security_rule(date(2026, 4, 6), date(2028, 5, 5), False)
+        self.assertEqual(one_day_more["country"], "United Kingdom")
+        self.assertEqual(one_month_more["country"], "United Kingdom")
+        self.assertEqual(one_month_more["months"], 25)
+
+    def test_replacing_another_worker_flips_to_the_uk(self):
+        rule = social_security_rule(date(2026, 4, 6), date(2028, 4, 5), True)
+        self.assertEqual(rule["country"], "United Kingdom")
