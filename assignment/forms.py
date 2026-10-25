@@ -23,10 +23,10 @@ HOST_COUNTRIES = [
     ("US", "United States (not supported yet)"),
 ]
 TREATMENTS = [
-    ("", "Default for this type"),
+    ("", "Default"),
     ("taxable cash", "Taxable cash"),
-    ("taxable benefit in kind", "Taxable benefit in kind"),
-    ("not taxable in the UK", "Not taxable in the UK"),
+    ("taxable benefit in kind", "Taxable benefit"),
+    ("not taxable in the UK", "Not taxable"),
 ]
 
 
@@ -118,13 +118,13 @@ class CostForm(forms.Form):
                 choices=type_choices, initial="other", required=False
             )
             self.fields[f"benefit_{i}_amount"] = forms.DecimalField(
-                required=False, min_value=0, widget=forms.NumberInput(attrs={"placeholder": "Amount"})
+                required=False, min_value=0
             )
             self.fields[f"benefit_{i}_currency"] = forms.ChoiceField(
                 choices=[("GBP", "GBP"), ("CHF", "CHF")], initial="GBP", required=False
             )
             self.fields[f"benefit_{i}_paid"] = forms.ChoiceField(
-                choices=[("per month", "per month"), ("per year", "per year"), ("once in year 1", "once in year 1")],
+                choices=[("per month", "per month"), ("per year", "per year"), ("once in year 1", "once, year 1")],
                 initial="once in year 1",
                 required=False,
             )

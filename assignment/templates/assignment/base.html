@@ -1,0 +1,27 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assignment cost estimate</title>
+  <link rel="stylesheet" href="{% static 'assignment/pico.classless.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assignment/app.css' %}">
+</head>
+<body>
+  <header>
+    <h1>Assignment cost estimate</h1>
+    <p>What it costs an employer to send an employee from Switzerland to the UK. An exercise, not tax advice.</p>
+    <nav>
+      <ul>
+        <li><a href="{% url 'cost' %}" aria-current="page">Cost estimate</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    <small>An exercise, not tax advice. The look comes from Pico.css (MIT licence).</small>
+  </footer>
+</body>
+</html>

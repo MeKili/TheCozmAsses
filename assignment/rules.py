@@ -157,7 +157,7 @@ FLIGHTS = {
 
 BENEFIT_TYPES = {
     "housing": {
-        "label": "Housing paid by the employer",
+        "label": "Housing",
         "treatment": "taxable benefit in kind",
         "sources": [EIM00580, EIM03117],
     },
