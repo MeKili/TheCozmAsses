@@ -123,3 +123,62 @@ SOCIAL_SECURITY_RULE = {
         },
     ],
 }
+
+EIM_URL = "https://www.gov.uk/hmrc-internal-manuals/employment-income-manual/"
+
+EIM03102 = {"title": "EIM03102: removal costs, charging provisions", "url": EIM_URL + "eim03102"}
+EIM03103 = {"title": "EIM03103: removal costs, the exemption from charge", "url": EIM_URL + "eim03103"}
+EIM03111 = {"title": "EIM03111: removal costs, transporting belongings", "url": EIM_URL + "eim03111"}
+EIM03116 = {"title": "EIM03116: removal costs, international moves", "url": EIM_URL + "eim03116"}
+EIM03117 = {"title": "EIM03117: removal costs, temporary living accommodation", "url": EIM_URL + "eim03117"}
+EIM00580 = {"title": "EIM00580: employer paying the employee's debt", "url": EIM_URL + "eim00580"}
+EIM35030 = {"title": "EIM35030: travel between the home country and the UK", "url": EIM_URL + "eim35030"}
+
+UK_EMPLOYER_NI = {
+    "secondary_threshold": Decimal(5000),
+    "employer_rate": Decimal("0.15"),
+    "class_1a_rate": Decimal("0.15"),
+    "sources": [
+        {
+            "title": "Rates and thresholds for employers 2026 to 2027",
+            "url": "https://www.gov.uk/guidance/rates-and-thresholds-for-employers-2026-to-2027",
+        },
+    ],
+}
+
+REMOVAL_COSTS = {
+    "limit": Decimal(8000),
+    "sources": [EIM03103, EIM03111, EIM03117],
+}
+
+FLIGHTS = {
+    "sources": [EIM03116, EIM35030],
+}
+
+BENEFIT_TYPES = {
+    "housing": {
+        "label": "Housing paid by the employer",
+        "treatment": "taxable benefit in kind",
+        "sources": [EIM00580, EIM03117],
+    },
+    "cash": {
+        "label": "Cash allowance",
+        "treatment": "taxable cash",
+        "sources": [EIM03102, EIM03103],
+    },
+    "moving": {
+        "label": "Moving costs",
+        "treatment": "removal costs",
+        "sources": REMOVAL_COSTS["sources"],
+    },
+    "temporary_housing": {
+        "label": "Temporary housing",
+        "treatment": "removal costs",
+        "sources": REMOVAL_COSTS["sources"],
+    },
+    "other": {
+        "label": "Other benefit",
+        "treatment": "taxable cash",
+        "sources": [EIM03102],
+    },
+}
