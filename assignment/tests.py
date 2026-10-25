@@ -1,0 +1,34 @@
+from decimal import Decimal
+
+from django.test import SimpleTestCase
+
+from assignment.engine.gross_up import gross_up
+from assignment.engine.uk_tax import uk_tax
+
+
+class UkTaxTests(SimpleTestCase):
+    def test_band_edges(self):
+        self.assertEqual(uk_tax(Decimal(12570)), 0)
+        self.assertEqual(uk_tax(Decimal(50270)), 7540)
+        self.assertEqual(uk_tax(Decimal(100000)), 27432)
+        self.assertEqual(uk_tax(Decimal(125140)), 42516)
+        self.assertEqual(uk_tax(Decimal(200000)), 76203)
+
+    def test_lost_allowance_makes_the_rate_60_percent(self):
+        extra_tax = uk_tax(Decimal(110000)) - uk_tax(Decimal(100000))
+        self.assertEqual(extra_tax, 6000)
+
+
+class GrossUpTests(SimpleTestCase):
+    def test_tax_equals_tax_on_income_plus_tax(self):
+        for income in [20000, 60000, 80000, 110000, 158868, 250000]:
+            income = Decimal(income)
+            tax, rounds = gross_up(income)
+            self.assertAlmostEqual(tax, uk_tax(income + tax), places=2)
+
+    def test_one_step_answer_is_too_low_when_the_allowance_is_lost(self):
+        income = Decimal(110000)
+        tax, rounds = gross_up(income)
+        one_step = uk_tax(income) / (1 - Decimal("0.4"))
+        self.assertGreater(tax, one_step + 5000)
+        self.assertAlmostEqual(tax, Decimal("64914.545"), places=2)
